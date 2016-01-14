@@ -12,6 +12,7 @@ import uuid
 
 import hiera
 import hiera.exc
+import logging
 
 
 class HieraClientTests(unittest.TestCase):
@@ -38,7 +39,7 @@ class HieraClientTests(unittest.TestCase):
         h = self.create_client('my-config.yml')
         self.assertEqual('my-config.yml', h.config_filename)
         self.assertEqual('hiera', h.hiera_binary)
-        self.assertEqual({}, h.environment)
+        self.assertEqual({}, h.hiera_vars)
 
     def test_init__environment(self):
         """Verify init stores all extra keyword arguments as environment
@@ -49,10 +50,11 @@ class HieraClientTests(unittest.TestCase):
                         'random_key':  'these-flashing-lights-are-bright!',
                         }
         h = self.create_client('my-config.yml',
-                               environment='unittest',
-                               host='ima-superstar',
-                               random_key='these-flashing-lights-are-bright!')
-        self.assertEqual(expected_env, h.environment)
+                               hiera_vars={'environment': 'unittest',
+                                           'host': 'ima-superstar',
+                                           'random_key': 'these-flashing-lights-are-bright!'})
+
+        self.assertEqual(expected_env, h.hiera_vars)
 
     def test_init__nonexistent_config(self):
         """Verify HieraError is raised when config file does not exist."""
@@ -130,7 +132,6 @@ class HieraClientTests(unittest.TestCase):
         expected_command = ['hiera', '--config', 'my-config.yml', 'some-key']
 
         actual_command = h._command('some-key')
-
         self.assertEqual(expected_command, actual_command)
 
     def test_command__environment(self):
@@ -138,7 +139,7 @@ class HieraClientTests(unittest.TestCase):
         env = {'environment': 'unittest',
                'fqdn':        'ima-superstar',
                }
-        h = self.create_client('my-config.yml', **env)
+        h = self.create_client('my-config.yml', hiera_vars=env)
         expected_command = ['hiera', '--config', 'my-config.yml', 'some-key',
                             'environment=unittest', 'fqdn=ima-superstar']
 

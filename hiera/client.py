@@ -17,23 +17,26 @@ __all__ = ('HieraClient',)
 class HieraClient(object):
     __doc__ = __doc__
 
-    def __init__(self, config_filename, hiera_binary='hiera', **kwargs):
+    def __init__(self, config_filename, hiera_binary='hiera', hiera_vars = {}):
         """Create a new instance with the given settings.
 
-        Key value params passed into this will be added to the environment when
-        running the hiera client. For example, (environment='developer',
-        osfamily='Debian') as keyword args to __init__ would result in hiera
-        calls like this:
+        hiera_vars is passed in as a dict.  This dict will translate key=value and be appended
+        onto the class definition would be:
+          obj = hiera.HieraClient(config_filename='hiera.yaml', hiera_binary='hiera',
+                hiera_vars={'environment': 'developer', 'osfamily': 'Debian', '::facter_key': 'helloworld'}
+          obj.get('some_key')
 
-          hiera --config <config_filename> <key> environment=developer \
-            osfamily=Debian
+        and the hiera command line would result ini:
+          [hiera_binary] --config [config_filename] [key] [hiera_vars.key]=[hiera_vars.value]
+          hiera --config hiera.yaml some_key environment='developer' osfamily='Debian' ::facter_key='helloworld'
 
         :param config_filename: Path to the hiera configuration file.
         :param hiera_binary: Path to the hiera binary. Defaults to 'hiera'.
+        :param hiera_vars: Custom Key Values to pass to the hiera command.  This is to get around python not accepting colons in the keys. Format: hiera_vars = {'::custom_fact': 'value'}
         """
         self.config_filename = config_filename
         self.hiera_binary = hiera_binary
-        self.environment = kwargs
+        self.hiera_vars = hiera_vars
 
         self._validate()
         logging.debug('New Hiera instance: {0}'.format(self))
@@ -47,7 +50,7 @@ class HieraClient(object):
             return '='.join((key, repr(getattr(self, key, None))))
 
         params_list = map(kv_str,
-                          ['config_filename', 'hiera_binary', 'environment'])
+                          ['config_filename', 'hiera_binary', 'hiera_vars'])
         params_string = ', '.join(params_list)
         return '{0}({1})'.format(self.__class__.__name__, params_string)
 
@@ -76,8 +79,11 @@ class HieraClient(object):
         cmd = [self.hiera_binary,
                '--config', self.config_filename,
                key_name]
-        cmd.extend(map(lambda *env_var: '='.join(*env_var),
-                       self.environment.iteritems()))
+
+        if self.hiera_vars:
+            for key, value in self.hiera_vars.iteritems():
+                cmd.append("%s=%s" % (key, value))
+
         return cmd
 
     def _hiera(self, key_name):
