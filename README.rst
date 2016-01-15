@@ -1,9 +1,10 @@
 hiera-py
 ========
-Python interface for the hiera hierarchical database.
+Python interface for the hiera hierarchical database. Forked from https://github.com/thomasvandoren/hiera-py to fix
+issues that are specific to my needs.
 
 .. image:: https://travis-ci.org/thomasvandoren/hiera-py.png?branch=master
-    :target: https://travis-ci.org/thomasvandoren/hiera-py
+    :target: https://github.com/sharkannon/hiera-py
 
 See the `documentation on puppetlabs.com
 <http://docs.puppetlabs.com/hiera/latest/>`_ for more detail.
@@ -13,13 +14,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install hiera-py
-
-    # Or, if you prefer easy_install:
-    easy_install hiera-py
-
-    # Or, if you prefer to install from source:
-    python setup.py install
+    pip install git+git://github.com/sharkannon/hiera-py
 
 Supported python versions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,7 +30,7 @@ Getting Started
 .. code-block:: pycon
 
     >>> import hiera
-    >>> hiera_client = hiera.HieraClient('/etc/hiera.yml', environment='dev')
+    >>> hiera_client = hiera.HieraClient('/etc/hiera.yml', hiera_vars={'environment': 'dev')
     >>> hiera_client.get('my_key')
     'my_value'
     >>> hiera_client.get('nonexistent_key')
@@ -49,7 +44,7 @@ BSD
 
 Authors
 -------
-Thomas Van Doren
+Stephen Herd (Forked from Thomas Van Doren)
 
 Testing
 -------

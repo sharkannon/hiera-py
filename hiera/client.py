@@ -26,7 +26,7 @@ class HieraClient(object):
                 hiera_vars={'environment': 'developer', 'osfamily': 'Debian', '::facter_key': 'helloworld'}
           obj.get('some_key')
 
-        and the hiera command line would result ini:
+        and the hiera command line would result in:
           [hiera_binary] --config [config_filename] [key] [hiera_vars.key]=[hiera_vars.value]
           hiera --config hiera.yaml some_key environment='developer' osfamily='Debian' ::facter_key='helloworld'
 
